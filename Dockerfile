@@ -35,6 +35,7 @@ RUN set -ex \
         libpq-dev \
         git \
     ' \
+    && mkdir -p /usr/share/man/man1 \
     && apt-get update -yqq \
     && apt-get upgrade -yqq \
     && apt-get install -yqq --no-install-recommends \
@@ -49,11 +50,19 @@ RUN set -ex \
         rsync \
         netcat \
         locales \
+        ca-certificates-java \
+        openjdk-8-jre-headless \
+        openjdk-8-jdk-headless \
+        libgeos-dev \
+        squashfs-tools \
+        unzip \
+        zip \
     && sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen \
     && locale-gen \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
     && useradd -ms /bin/bash -d ${AIRFLOW_HOME} airflow \
     && pip install -U pip setuptools wheel \
+    && apt-get remove -yqq python3-pip \
     && pip install Cython \
     && pip install pytz \
     && pip install pyOpenSSL \
@@ -70,7 +79,9 @@ RUN set -ex \
         /var/tmp/* \
         /usr/share/man \
         /usr/share/doc \
-        /usr/share/doc-base
+        /usr/share/doc-base \
+    && mkdir -p /opt \
+    && curl https://archive.apache.org/dist/spark/spark-2.2.1/spark-2.2.1-bin-hadoop2.7.tgz  | tar -xvzf - -C /opt
 
 COPY script/entrypoint.sh /entrypoint.sh
 COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
